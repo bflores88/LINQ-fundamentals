@@ -19,8 +19,8 @@ namespace Features
                 new Employee {Id = 3, Name = "Sally"}
             };
 
-            foreach (var employee in developers.Where(employee => employee.Name.StartsWith("B")))
-            {
+            foreach (var employee in developers.Where(e => e.Name.StartsWith("B")))
+            {l
                 Console.WriteLine(employee.Name);
             }
         }
