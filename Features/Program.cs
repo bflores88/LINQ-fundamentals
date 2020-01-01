@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Channels;
 
 namespace Features
 {
@@ -8,6 +9,12 @@ namespace Features
     {
         static void Main(string[] args)
         {
+            Func<int, int> square = x => x * x;
+            Console.WriteLine(square(2));
+
+            Action<int> write = Console.WriteLine;
+            write(square(3));
+
             IEnumerable<Employee> developers = new Employee[]
             {
                 new Employee {Id = 1, Name = "Brenda"},
@@ -20,14 +27,9 @@ namespace Features
             };
 
             foreach (var employee in developers.Where(e => e.Name.StartsWith("B")))
-            {l
+            {
                 Console.WriteLine(employee.Name);
             }
-        }
-
-        private static bool NameStartsWithB(Employee employee)
-        {
-            return employee.Name.StartsWith("B");
         }
     }
 }
