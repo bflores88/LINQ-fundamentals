@@ -17,7 +17,7 @@ namespace Queries
                 new Movie {Title = "My Neighbor Totoro", Rating = 8.1f, Year = 1988}
             };
 
-            var query = movies.Where(m => m.Year > 2000);
+            var query = movies.Filter(m => m.Year > 2000);
 
             foreach (var movie in query)
             {
