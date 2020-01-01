@@ -8,6 +8,16 @@ namespace Queries
     {
         public string Title { get; set; }
         public float Rating { get; set; }
-        public int Year { get; set; }
+
+        private int _year;
+        public int Year {
+            get
+            {
+                Console.WriteLine($"Returning {_year} for {Title}");
+                return _year;
+            }
+            set { _year = value; }
+
+        }
     }
 }
