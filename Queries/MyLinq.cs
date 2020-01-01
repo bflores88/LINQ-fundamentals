@@ -6,6 +6,8 @@ namespace Queries
 {
     public static class MyLinq
     {
+        // LINQ uses yield return for deferred execution
+
         public static IEnumerable<T> Filter<T>(this IEnumerable<T> source,
                                                 Func<T, bool> predicate)
         {
