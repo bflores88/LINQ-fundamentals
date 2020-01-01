@@ -19,7 +19,11 @@ namespace Features
                 new Employee {Id = 3, Name = "Sally"}
             };
 
-            foreach (var employee in developers.Where(NameStartsWithB))
+            foreach (var employee in developers.Where(
+            delegate (Employee employee)
+            {
+                return employee.Name.StartsWith("B");
+            }))
             {
                 Console.WriteLine(employee.Name);
             }
