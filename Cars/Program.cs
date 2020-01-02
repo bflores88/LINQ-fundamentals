@@ -13,7 +13,6 @@ namespace Cars
 
             var query = 
                 from car in cars
-                where car.Manufacturer == "BMW" && car.Year == 2016
                 orderby car.Combined descending , car.Name ascending 
                 select  new
                 {
@@ -23,15 +22,19 @@ namespace Cars
                 };
 
             var result =
-                cars.All(c => c.Manufacturer == "Ford");
+                cars.SelectMany(c => c.Name)
+                    .OrderBy(c => c);
 
-            Console.WriteLine(result);
-
-
-            foreach (var car in query.Take(10))
+            foreach (var character in result)
             {
-                Console.WriteLine($"{car.Name}: {car.Combined}");
+                Console.WriteLine(character);
             }
+
+
+            //foreach (var car in query.Take(10))
+            //{
+            //    Console.WriteLine($"{car.Name}: {car.Combined}");
+            //}
         }
 
         private static List<Car> ProcessFile(string path)
