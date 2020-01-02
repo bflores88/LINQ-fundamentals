@@ -15,7 +15,8 @@ namespace Cars
             var query = 
                 from car in cars
                 join manufacturer in manufacturers 
-                    on car.Manufacturer equals manufacturer.Name
+                    on new { car.Manufacturer, car.Year } 
+                    equals new { Manufacturer = manufacturer.Name, manufacturer.Year }
                 orderby car.Combined descending , car.Name ascending 
                 select  new
                 {
@@ -26,20 +27,15 @@ namespace Cars
 
             var query2 =
                 cars.Join(manufacturers,
-                        c => c.Manufacturer,
-                        m => m.Name, (c, m) => new
+                        c => new { c.Manufacturer, c.Year },
+                        m => new { Manufacturer = m.Name, m.Year }, (c, m) => new
                         {
-                           Car = c,
-                           Manufacturer = m
+                            m.Headquarters,
+                            c.Name,
+                            c.Combined
                         })
-                    .OrderByDescending(c => c.Car.Combined)
-                    .ThenBy(c => c.Car.Name)
-                    .Select( c => new
-                    {
-                        c.Manufacturer.Headquarters,
-                        c.Car.Name,
-                        c.Car.Combined
-                    });
+                    .OrderByDescending(c => c.Combined)
+                    .ThenBy(c => c.Name);
 
             var result =
                 cars.SelectMany(c => c.Name)
@@ -51,7 +47,7 @@ namespace Cars
             //}
 
 
-            foreach (var car in query2.Take(10))
+            foreach (var car in query.Take(10))
             {
                 Console.WriteLine($"{car.Headquarters} {car.Name}: {car.Combined}");
             }
