@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.Emit;
 
 namespace Cars
 {
@@ -13,33 +14,42 @@ namespace Cars
             var manufacturers = ProcessManufacturers("manufacturers.csv");
 
             var query =
-                from manufacturer in manufacturers
-                join car in cars on manufacturer.Name equals car.Manufacturer
-                    into carGroup
+                from car in cars
+                group car by car.Manufacturer
+                into carGroup
                 select new
                 {
-                    Manufacturer = manufacturer,
-                    Cars = carGroup
+                    Name = carGroup.Key,
+                    Max = carGroup.Max(c => c.Combined),
+                    Min = carGroup.Min(c => c.Combined),
+                    Avg = carGroup.Average(c => c.Combined)
                 } into result
-                group result by result.Manufacturer.Headquarters;
+                orderby result.Max descending 
+                select result;
 
             var query2 =
-                manufacturers.GroupJoin(cars, m => m.Name, c => c.Manufacturer, (m, g) => new
+                cars.GroupBy(c => c.Manufacturer)
+                    .Select(g =>
                     {
-                        Manufacturer = m,
-                        Cars = g
+                        var results = g.Aggregate(new CarStatistics(), 
+                            (acc, c) => acc.Accumulate(c),
+                            acc => acc.Compute());
+                        return new
+                        {
+                            Name = g.Key,
+                            Avg = results.Average,
+                            Max = results.Max,
+                            Min = results.Min
+                        };
                     })
-                    .GroupBy(m => m.Manufacturer.Headquarters);
+                    .OrderByDescending(r => r.Max);
 
-            foreach (var group in query2)
+            foreach (var result in query2)
             {
-                Console.WriteLine(group.Key);
-                foreach (var car in group.SelectMany(g => g.Cars)
-                                        .OrderByDescending(c => c.Combined)
-                                        .Take(3))
-                {
-                    Console.WriteLine($"\t{car.Name} : {car.Combined}");
-                }
+                Console.WriteLine(result.Name);
+                Console.WriteLine($"\t Max: {result.Max}");
+                Console.WriteLine($"\t Min: {result.Min}");
+                Console.WriteLine($"\t Avg: {result.Avg}");
             }
         }
 
@@ -75,6 +85,36 @@ namespace Cars
                 //select Car.ParseFromCsv(line);
 
             return query.ToList();
+        }
+    }
+
+    public class CarStatistics
+    {
+        public CarStatistics()
+        {
+            Max = Int32.MinValue;
+            Min = Int32.MaxValue;
+        }
+
+        public CarStatistics Accumulate(Car car)
+        {
+            Count += 1;
+            Total += car.Combined;
+            Max = Math.Max(Max, car.Combined);
+            Min = Math.Min(Min, car.Combined);
+            return this;
+        }
+
+        public int Max { get; set; }
+        public int Min { get; set; }
+        public int Total { get; set; }
+        public int Count { get; set; }
+        public double Average { get; set; }
+
+        public CarStatistics Compute()
+        {
+            Average = Total / Count;
+            return this;
         }
     }
 
