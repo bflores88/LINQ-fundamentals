@@ -20,10 +20,13 @@ namespace Cars
 
         private static void QueryXml()
         {
+            var ns = (XNamespace)"http://pluralsight.com/cars/2016";
+            var ex = (XNamespace)"http://pluralsight.com/cars/2016/ex";
             var document = XDocument.Load("fuel.xml");
             var query =
-                from element in document.Element("Cars").Elements("Car")
-                where element.Attribute("Manufacturer").Value == "BMW"
+                from element in document.Element(ns + "Cars")?.Elements(ex + "Car") 
+                                ?? Enumerable.Empty<XElement>()
+                where element.Attribute("Manufacturer")?.Value == "BMW"
                 select element.Attribute("Name").Value;
 
             foreach (var name in query)
@@ -36,14 +39,17 @@ namespace Cars
         {
             var records = ProcessCars("fuel.csv");
 
+            var ns = (XNamespace)"http://pluralsight.com/cars/2016";
+            var ex = (XNamespace)"http://pluralsight.com/cars/2016/ex";
             var document = new XDocument();
-            var cars = new XElement("Cars",
+            var cars = new XElement(ns + "Cars",
                 from record in records
-                select new XElement("Car",
+                select new XElement( ex + "Car",
                     new XAttribute("Name", record.Name),
                     new XAttribute("Combined", record.Combined),
                     new XAttribute("Manufacturer", record.Manufacturer)));
 
+            cars.Add(new XAttribute(XNamespace.Xmlns + "ex", ex));
             document.Add(cars);
             document.Save("fuel.xml");
         }
