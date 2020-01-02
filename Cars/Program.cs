@@ -15,7 +15,12 @@ namespace Cars
                 from car in cars
                 where car.Manufacturer == "BMW" && car.Year == 2016
                 orderby car.Combined descending , car.Name ascending 
-                select  car;
+                select  new
+                {
+                    car.Manufacturer,
+                    car.Name,
+                    car.Combined
+                };
 
             var result =
                 cars.All(c => c.Manufacturer == "Ford");
