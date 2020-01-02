@@ -29,12 +29,17 @@ namespace Cars
                         c => c.Manufacturer,
                         m => m.Name, (c, m) => new
                         {
-                            m.Headquarters,
-                            c.Name,
-                            c.Combined
+                           Car = c,
+                           Manufacturer = m
                         })
-                    .OrderByDescending(c => c.Combined)
-                    .ThenBy(c => c.Name);
+                    .OrderByDescending(c => c.Car.Combined)
+                    .ThenBy(c => c.Car.Name)
+                    .Select( c => new
+                    {
+                        c.Manufacturer.Headquarters,
+                        c.Car.Name,
+                        c.Car.Combined
+                    });
 
             var result =
                 cars.SelectMany(c => c.Name)
