@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Xml.Linq;
 using System.Reflection.Emit;
 
@@ -11,29 +12,40 @@ namespace Cars
     {
         static void Main(string[] args)
         {
+            CreateXml();
+            QueryXml();
+
+            var manufacturers = ProcessManufacturers("manufacturers.csv");
+        }
+
+        private static void QueryXml()
+        {
+            var document = XDocument.Load("fuel.xml");
+            var query =
+                from element in document.Element("Cars").Elements("Car")
+                where element.Attribute("Manufacturer").Value == "BMW"
+                select element.Attribute("Name").Value;
+
+            foreach (var name in query)
+            {
+                Console.WriteLine(name);
+            }
+        }
+
+        private static void CreateXml()
+        {
             var records = ProcessCars("fuel.csv");
 
             var document = new XDocument();
-            var cars = new XElement("Cars");
-
-            foreach (var record in records)
-            {
-                var car = new XElement("Car");
-                var name = new XElement("Name", record.Name);
-                var combined = new XElement("Combined", record.Combined);
-
-                car.Add(name);
-                car.Add(combined);
-                cars.Add(car);
-            }
+            var cars = new XElement("Cars",
+                from record in records
+                select new XElement("Car",
+                    new XAttribute("Name", record.Name),
+                    new XAttribute("Combined", record.Combined),
+                    new XAttribute("Manufacturer", record.Manufacturer)));
 
             document.Add(cars);
             document.Save("fuel.xml");
-
-
-            var manufacturers = ProcessManufacturers("manufacturers.csv");
-
-
         }
 
         private static List<Manufacturer> ProcessManufacturers(string path)
